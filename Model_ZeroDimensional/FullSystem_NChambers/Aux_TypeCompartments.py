@@ -11,7 +11,7 @@ class Compartment:
 		self.name : str = strName
 		self.dias_volume : float = dias_volume
 		self.pressure = [ initialP ] #.append( initialP )
-		self.volume = []
+		self.volume = [ dias_volume ]
 		self.inletQ = {}
 		self.outletQ = {}
 		self.compliance = lambda t: compliance(t, param = [0.])
@@ -20,8 +20,11 @@ class Compartment:
 	def setCompliance( self, compliance, param ):
 		self.compliance = lambda t: compliance(t, param = param)
 
-	def setSource( self, source ):
-		self.source = source 
+	def setSource( self, type, source, param ):
+		if type == 'inlet':
+			self.inletQ[ id ] = lambda pi: resistance( param[1], pi, param = param )
+		elif type == 'outlet':
+			self.outletQ[ id ] = lambda pi: resistance( pi, param[1], param = param )
 
 	def setConnectivity( self, type, id, resistance, param ):
 		if type == 'inlet':
@@ -29,8 +32,9 @@ class Compartment:
 		elif type == 'outlet':
 			self.outletQ[ id ] = lambda pi, pj: resistance( pi, pj, param = param )
 
-	def appendPressure( self, pressure ):
+	def appendPressure( self, pressure, time ):
 		self.pressure.append( pressure )
+		self.volume.append( self.dias_volume + pressure * self.compliance( time ) )
 
 
 ##############################################################################
